@@ -47,10 +47,11 @@ fail()  { printf '\033[31m[ERR ]\033[0m %s\n' "$*" >&2; exit 1; }
 # ---------- 1. 依赖检查 ----------
 info "检查依赖…"
 need() { command -v "$1" >/dev/null 2>&1 || fail "缺少 $1，请先安装。$2"; }
-need git  "例如: apt install -y git"
-need go   "https://go.dev/dl/"
-need node "https://nodejs.org/ (建议 >= 20)"
-need npm  ""
+need curl "例如: apt install -y curl"
+need tar  "通常随系统自带"
+need go   "https://go.dev/dl/ （需 1.25+）"
+need node "https://nodejs.org/ （建议 >= 20）"
+need npm  "通常随 node 一起安装"
 command -v gcc >/dev/null 2>&1 || command -v cc >/dev/null 2>&1 \
   || fail "缺少 C 编译器（构建 SQLite 需要 CGO）。例如: apt install -y build-essential"
 
@@ -70,18 +71,18 @@ else
 fi
 info "zstd 打包方式: $ZSTD_BIN"
 
-# ---------- 2. 拉取三个仓库 ----------
+# ---------- 2. 下载三个仓库源码（纯 curl，无需 git） ----------
 mkdir -p "$WORK/src"
 pull() { # $1=repo
-  local dir="$WORK/src/$1"
-  if [ -d "$dir/.git" ]; then
-    info "更新 $1…"
-    git -C "$dir" fetch --quiet origin "$BRANCH"
-    git -C "$dir" reset --hard --quiet "origin/$BRANCH"
-  else
-    info "克隆 $1…"
-    git clone --quiet --branch "$BRANCH" "https://github.com/$OWNER/$1.git" "$dir"
-  fi
+  local repo="$1" dir="$WORK/src/$1" tmp="$WORK/src/.$1.tmp"
+  info "下载 $repo（${BRANCH}）…"
+  rm -rf "$tmp"; mkdir -p "$tmp"
+  # codeload 直出 tar.gz，等价于 GitHub 的 "Download ZIP"，不依赖 git
+  curl -fsSL "https://codeload.github.com/$OWNER/$repo/tar.gz/refs/heads/$BRANCH" \
+    | tar -xz -C "$tmp" --strip-components=1 \
+    || fail "下载 $repo 失败（检查仓库名/分支/网络）"
+  rm -rf "$dir"
+  mv "$tmp" "$dir"
 }
 pull komari
 pull komari-web
