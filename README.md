@@ -9,15 +9,37 @@
 
 ---
 
-## 一、快速开始（一键构建）
+## 一、快速开始（推荐：预编译二进制，和原版一样）
 
-在**面板服务器**上执行（Linux / macOS / WSL）：
+在**面板服务器**上执行一条命令：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh | bash
+```
+
+这就是**原版官方安装器**（TUI 向导、systemd 服务、升级/备份一应俱全），本分支仅把下载源指向自己的 release，所以：
+
+- **不需要安装 go / node / gcc**，只依赖 `curl` + `tar`（系统一般自带）
+- 自动识别架构（amd64 / arm64）
+- 安装到 `/opt/komari`，服务名 `komari`，默认端口 `25774`
+- 首次启动后浏览器访问 `http://<IP>:25774` 走安装引导
+
+支持的架构：`linux amd64`、`linux arm64`（其他平台请用下面的源码构建方式）。
+
+> 想指定目录 / 端口 / 跳过 TUI：直接运行脚本并加参数，例如
+> `curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh && sudo bash install-komari.sh --install-dir /opt/komari`
+
+---
+
+## 一（附）、可选：从源码自己编译
+
+只有在需要改代码、或要在本分支未提供二进制的平台上运行时才需要。**这条路需要完整编译环境**（go ≥1.25、node ≥20、gcc、zstd），服务器上没装就别走这条。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-source.sh | bash
 ```
 
-脚本会自动完成：依赖检查 → 拉取三个仓库 → 构建前端 → 打包主题 → 编译服务端与探针。
+脚本会自动完成：依赖检查 → 下载三个仓库源码 → 构建前端 → 打包主题 → 编译服务端与探针。
 
 产物位置：
 
@@ -30,7 +52,8 @@ curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-sourc
 
 | 依赖 | 说明 |
 |---|---|
-| git / node(≥20) / npm | 构建前端 |
+| curl / tar | 下载并解压源码（不再需要 git） |
+| node（≥20）/ npm | 构建前端 |
 | go（≥1.25） | 构建后端与探针 |
 | gcc / cc | SQLite 需要 CGO，**必须**有 C 编译器 |
 | zstd | 打包前端产物给后端 embed |
@@ -38,15 +61,21 @@ curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-sourc
 Debian/Ubuntu 一把装齐：
 
 ```bash
-sudo apt update && sudo apt install -y git build-essential zstd curl
+sudo apt update && sudo apt install -y curl build-essential zstd
 # node 与 go 请按官方方式安装（https://nodejs.org 、https://go.dev/dl）
 ```
 
-> 重复执行同一命令即为**更新代码并重新构建**，不会重复下载。
+> 重复执行同一命令即为**重新下载并构建**。
+> 注意：源码构建产出的二进制不含预编译包里的版本信息，仅建议用于开发验证。
 
 ---
 
 ## 二、启动与初始化
+
+## 二、启动与初始化
+
+> **如果你用的是上面的 `install-komari.sh` 安装器，这一步已经自动完成了**：二进制在 `/opt/komari/komari`，systemd 服务已创建并启动，直接访问 `http://<服务器IP>:25774` 即可。
+> 以下内容适用于「源码自行编译」或「手动部署」的情况。
 
 ```bash
 mkdir -p /opt/komari && cd /opt/komari
@@ -91,6 +120,16 @@ sudo systemctl status komari
 ---
 
 ## 四、升级（原地更新，保留数据）
+
+### 方式 A：用官方安装器升级（推荐，无需编译环境）
+
+再次运行安装器即可，它会备份当前版本、下载新二进制并重启服务：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh | bash
+```
+
+### 方式 B：源码构建后升级（需编译环境）
 
 ```bash
 curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-source.sh
