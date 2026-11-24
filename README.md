@@ -9,32 +9,48 @@
 
 ---
 
-## 一、快速开始（推荐：预编译二进制，和原版一样）
+## 一、快速开始（推荐：简洁安装，无交互菜单、无广告）
 
 在**面板服务器**上执行一条命令：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/install.sh | bash
 ```
 
-这就是**原版官方安装器**（TUI 向导、systemd 服务、升级/备份一应俱全），本分支仅把下载源指向自己的 release，所以：
+它只做三件事：下载本仓库的预编译二进制 → 装成 systemd 服务 → 启动。
 
-- **不需要安装 go / node / gcc**，只依赖 `curl` + `tar`（系统一般自带）
+- **不需要 go / node / gcc**，只依赖 `curl` + `systemd`
 - 自动识别架构（amd64 / arm64）
-- 安装到 `/opt/komari`，服务名 `komari`，默认端口 `25774`
-- 首次启动后浏览器访问 `http://<IP>:25774` 走安装引导
+- 全默认值，无需任何输入：目录 `/opt/komari`、端口 `25774`、服务名 `komari`
+- **已安装时自动走升级**：备份旧二进制 → 替换 → 重启，数据目录 `data` 不动
+- 结尾直接打印访问地址和管理命令，无赞助商等额外内容
+
+按需覆盖默认值：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/install.sh | bash -s -- --port 8080 --dir /www/komari
+```
+
+| 参数 | 说明 |
+|---|---|
+| `--port N` | 监听端口，默认 `25774` |
+| `--dir PATH` | 安装目录，默认 `/opt/komari` |
+| `--version TAG` | 指定版本，默认 `latest` |
+| `--no-start` | 只安装、不创建/重启服务 |
 
 支持的架构：`linux amd64`、`linux arm64`（其他平台请用下面的源码构建方式）。
 
-> 交互说明：脚本已固定从 `/dev/tty` 读取选项，所以 `curl ... | bash` 也能正常选择菜单。
-> 若所在环境没有终端（如某些自动化面板），请改为先下载再运行：
-> ```bash
-> curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh
-> sudo bash install-komari.sh
-> ```
+### 备选：原版完整安装器
 
-> 想指定目录 / 端口 / 跳过 TUI：直接运行脚本并加参数，例如
-> `curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh && sudo bash install-komari.sh --install-dir /opt/komari`
+需要 TUI 向导（可选 Lite 版 / 快照通道 / 卸载 / 清理备份等管理功能）时使用。已把下载源指到本仓库，并去掉了赞助商信息：
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh
+sudo bash install-komari.sh
+```
+
+> 交互说明：脚本已固定从 `/dev/tty` 读取选项，所以 `curl ... | bash` 也能正常选择菜单。
+> 若所在环境没有终端，请务必用上面「先下载再运行」的形式。
 
 ---
 
