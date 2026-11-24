@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"net"
 
 	"github.com/komari-monitor/komari/database/clients"
@@ -23,7 +24,27 @@ func saveClientBasicInfo(info map[string]interface{}, uuid string, fallbackIP st
 	info["uuid"] = uuid
 	applyFallbackClientIP(info, fallbackIP)
 	appendClientRegionFromGeoIP(info)
+	normalizeLineInfo(info)
 	return clients.SaveClientInfo(info)
+}
+
+// normalizeLineInfo 将 agent 上报的 line 对象序列化为 line_info JSON 字符串，
+// 以便存入 Client 模型的 varchar 字段。数据库只保存 line_info，移除原始 line。
+func normalizeLineInfo(info map[string]interface{}) {
+	line, exists := info["line"]
+	if !exists || line == nil {
+		return
+	}
+	// 已经是字符串则直接用
+	if s, ok := line.(string); ok {
+		info["line_info"] = s
+		delete(info, "line")
+		return
+	}
+	if b, err := json.Marshal(line); err == nil {
+		info["line_info"] = string(b)
+	}
+	delete(info, "line")
 }
 
 func applyFallbackClientIP(info map[string]interface{}, fallbackIP string) {

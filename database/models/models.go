@@ -9,20 +9,22 @@ import (
 
 // Client represents a registered client device
 type Client struct {
-	UUID             string     `json:"uuid,omitempty" gorm:"type:varchar(36);primaryKey"`
-	Token            string     `json:"token,omitempty" gorm:"type:varchar(255);unique;not null"`
-	Name             string     `json:"name" gorm:"type:varchar(100)"`
-	CpuName          string     `json:"cpu_name" gorm:"type:varchar(100)"`
-	Virtualization   string     `json:"virtualization" gorm:"type:varchar(50)"`
-	Arch             string     `json:"arch" gorm:"type:varchar(50)"`
-	CpuCores         int        `json:"cpu_cores" gorm:"type:int"`
-	CpuPhysicalCores int        `json:"cpu_physical_cores" gorm:"type:int"`
-	OS               string     `json:"os" gorm:"type:varchar(100)"`
-	KernelVersion    string     `json:"kernel_version" gorm:"type:varchar(100)"`
-	GpuName          string     `json:"gpu_name" gorm:"type:varchar(100)"`
-	IPv4             string     `json:"ipv4,omitempty" gorm:"type:varchar(100)"`
-	IPv6             string     `json:"ipv6,omitempty" gorm:"type:varchar(100)"`
-	Region           string     `json:"region" gorm:"type:varchar(100)"`
+	UUID             string `json:"uuid,omitempty" gorm:"type:varchar(36);primaryKey"`
+	Token            string `json:"token,omitempty" gorm:"type:varchar(255);unique;not null"`
+	Name             string `json:"name" gorm:"type:varchar(100)"`
+	CpuName          string `json:"cpu_name" gorm:"type:varchar(100)"`
+	Virtualization   string `json:"virtualization" gorm:"type:varchar(50)"`
+	Arch             string `json:"arch" gorm:"type:varchar(50)"`
+	CpuCores         int    `json:"cpu_cores" gorm:"type:int"`
+	CpuPhysicalCores int    `json:"cpu_physical_cores" gorm:"type:int"`
+	OS               string `json:"os" gorm:"type:varchar(100)"`
+	KernelVersion    string `json:"kernel_version" gorm:"type:varchar(100)"`
+	GpuName          string `json:"gpu_name" gorm:"type:varchar(100)"`
+	IPv4             string `json:"ipv4,omitempty" gorm:"type:varchar(100)"`
+	IPv6             string `json:"ipv6,omitempty" gorm:"type:varchar(100)"`
+	Region           string `json:"region" gorm:"type:varchar(100)"`
+	// LineInfo 是探针自动识别的出口线路信息（JSON 字符串），由 agent 随 basicInfo 上报。
+	LineInfo         string     `json:"line_info,omitempty" gorm:"type:varchar(512)"`
 	Remark           string     `json:"remark,omitempty" gorm:"type:longtext"`
 	PublicRemark     string     `json:"public_remark,omitempty" gorm:"type:longtext"`
 	MemTotal         int64      `json:"mem_total" gorm:"type:bigint"`

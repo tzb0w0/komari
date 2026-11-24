@@ -328,37 +328,38 @@ func getNodesLatestStatus(ctx context.Context, req *rpc.JsonRpcRequest) (any, *r
 	}
 
 	type recordLike struct {
-		Client            string              `json:"client"`
-		Time              time.Time           `json:"time"`
-		Cpu               float32             `json:"cpu"`
-		Gpu               float32             `json:"gpu"`
-		GpuCount          int                 `json:"gpu_count,omitempty"`
-		GpuAverageUsage   float64             `json:"gpu_average_usage,omitempty"`
-		GpuDetailedInfo   []v2.GPUDeviceInfo  `json:"gpu_detailed_info,omitempty"`
-		Ram               int64               `json:"ram"`
-		RamTotal          int64               `json:"ram_total"`
-		Swap              int64               `json:"swap"`
-		SwapTotal         int64               `json:"swap_total"`
-		Load              float32             `json:"load"`
-		Load5             float32             `json:"load5"`
-		Load15            float32             `json:"load15"`
-		Temp              float32             `json:"temp"`
-		Disk              int64               `json:"disk"`
-		DiskTotal         int64               `json:"disk_total"`
-		NetIn             int64               `json:"net_in"`
-		NetOut            int64               `json:"net_out"`
-		NetTotalUp        int64               `json:"net_total_up"`
-		NetTotalDown      int64               `json:"net_total_down"`
-		TrafficCycleMode  string              `json:"traffic_cycle_mode,omitempty"`
-		TrafficCycleStart *time.Time          `json:"traffic_cycle_start,omitempty"`
-		TrafficCycleEnd   *time.Time          `json:"traffic_cycle_end,omitempty"`
-		TrafficCalibrated bool                `json:"traffic_calibrated,omitempty"`
-		Process           int                 `json:"process"`
-		Connections       int                 `json:"connections"`
-		ConnectionsUdp    int                 `json:"connections_udp"`
-		Online            bool                `json:"online"`
-		Uptime            int64               `json:"uptime"`
-		Ping              map[string]pingStat `json:"ping"`
+		Client            string               `json:"client"`
+		Time              time.Time            `json:"time"`
+		Cpu               float32              `json:"cpu"`
+		Gpu               float32              `json:"gpu"`
+		GpuCount          int                  `json:"gpu_count,omitempty"`
+		GpuAverageUsage   float64              `json:"gpu_average_usage,omitempty"`
+		GpuDetailedInfo   []v2.GPUDeviceInfo   `json:"gpu_detailed_info,omitempty"`
+		Ram               int64                `json:"ram"`
+		RamTotal          int64                `json:"ram_total"`
+		Swap              int64                `json:"swap"`
+		SwapTotal         int64                `json:"swap_total"`
+		Load              float32              `json:"load"`
+		Load5             float32              `json:"load5"`
+		Load15            float32              `json:"load15"`
+		Temp              float32              `json:"temp"`
+		Disk              int64                `json:"disk"`
+		DiskTotal         int64                `json:"disk_total"`
+		NetIn             int64                `json:"net_in"`
+		NetOut            int64                `json:"net_out"`
+		NetTotalUp        int64                `json:"net_total_up"`
+		NetTotalDown      int64                `json:"net_total_down"`
+		TrafficCycleMode  string               `json:"traffic_cycle_mode,omitempty"`
+		TrafficCycleStart *time.Time           `json:"traffic_cycle_start,omitempty"`
+		TrafficCycleEnd   *time.Time           `json:"traffic_cycle_end,omitempty"`
+		TrafficCalibrated bool                 `json:"traffic_calibrated,omitempty"`
+		Process           int                  `json:"process"`
+		Connections       int                  `json:"connections"`
+		ConnectionsUdp    int                  `json:"connections_udp"`
+		Retransmit        *v2.RetransmitReport `json:"retransmit,omitempty"`
+		Online            bool                 `json:"online"`
+		Uptime            int64                `json:"uptime"`
+		Ping              map[string]pingStat  `json:"ping"`
 	}
 
 	respMap := make(map[string]recordLike, len(latest))
@@ -398,6 +399,7 @@ func getNodesLatestStatus(ctx context.Context, req *rpc.JsonRpcRequest) (any, *r
 			Process:           rep.Process,
 			Connections:       rep.Connections.TCP + rep.Connections.UDP,
 			ConnectionsUdp:    rep.Connections.UDP,
+			Retransmit:        &rep.Retransmit,
 			Online:            onlineSet[uuid],
 			Uptime:            rep.Uptime,
 			Ping:              stats,

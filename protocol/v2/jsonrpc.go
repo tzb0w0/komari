@@ -78,6 +78,7 @@ type Report struct {
 	Disk        DiskReport        `json:"disk"`
 	Network     NetworkReport     `json:"network"`
 	Connections ConnectionsReport `json:"connections"`
+	Retransmit  RetransmitReport  `json:"retransmit,omitempty"`
 	GPU         *GPUDetailReport  `json:"gpu,omitempty"`
 	Uptime      int64             `json:"uptime"`
 	Process     int               `json:"process"`
@@ -133,6 +134,14 @@ type NetworkReport struct {
 type ConnectionsReport struct {
 	TCP int `json:"tcp"`
 	UDP int `json:"udp"`
+}
+
+// RetransmitReport 是探针采集的 TCP 重传数据。
+type RetransmitReport struct {
+	Rate      float64 `json:"rate"`      // 重传率百分比
+	Retrans   uint64  `json:"retrans"`   // 区间重传报文数
+	OutSegs   uint64  `json:"out_segs"`  // 区间发送报文数
+	Available bool    `json:"available"` // 是否采集成功
 }
 
 type BasicInfoParams struct {
