@@ -3,22 +3,42 @@
 # Komari 一键从源码构建（含「自动识别线路 + TCP 重传测试」改造）
 #
 # 用法（Linux / macOS / WSL）：
-#   curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-source.sh | bash
 #
-# 或先下载再执行（可改参数）：
-#   curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-source.sh
-#   chmod +x build-from-source.sh
-#   OWNER=tzb0w0 WORK=$HOME/komari-build ./build-from-source.sh
+#  1) 只构建，不动现有服务（默认）——产物在 $WORK/src 下：
+#     curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-source.sh | bash
+#
+#  2) 原地升级已安装的服务（需 root；自动备份旧二进制并重启 systemd）：
+#     curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/build-from-source.sh
+#     sudo bash build-from-source.sh --upgrade
+#
+#  其他参数（用环境变量）：
+#     OWNER=tzb0w0 BRANCH=main WORK=$HOME/komari-build ./build-from-source.sh
+#     INSTALL_DIR=/opt/komari SERVICE_NAME=komari ./build-from-source.sh --upgrade
 #
 # 产物：
-#   $WORK/src/komari/komari            服务端二进制
+#   $WORK/src/komari/komari             服务端二进制
 #   $WORK/src/komari-agent/komari-agent 探针二进制
+#
+# ⚠️ 升级只替换二进制，不会动数据目录（$INSTALL_DIR/data）。
+#    切勿在别的目录直接运行 komari server —— 它会把 ./data 当成数据目录，
+#    从而生成一个空库，看起来像「数据全丢了」。
 # ============================================================
 set -euo pipefail
 
 OWNER="${OWNER:-tzb0w0}"
 BRANCH="${BRANCH:-main}"
 WORK="${WORK:-$HOME/komari-build}"
+INSTALL_DIR="${INSTALL_DIR:-/opt/komari}"
+SERVICE_NAME="${SERVICE_NAME:-komari}"
+UPGRADE=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --upgrade) UPGRADE=true ;;
+    -h|--help) sed -n '2,30p' "$0"; exit 0 ;;
+    *) echo "未知参数: $arg（可用: --upgrade）" >&2; exit 2 ;;
+  esac
+done
 
 info()  { printf '\033[32m[INFO]\033[0m %s\n' "$*"; }
 warn()  { printf '\033[33m[WARN]\033[0m %s\n' "$*"; }
@@ -104,20 +124,89 @@ info "构建探针 komari-agent…"
 cd "$WORK/src/komari-agent"
 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o komari-agent . || fail "探针构建失败"
 
-# ---------- 7. 完成 ----------
+# ---------- 7. 完成 / 原地升级 ----------
+BUILT_SERVER="$WORK/src/komari/komari"
+BUILT_AGENT="$WORK/src/komari-agent/komari-agent"
+
+if [ "$UPGRADE" = true ]; then
+  info "开始原地升级（INSTALL_DIR=$INSTALL_DIR / SERVICE_NAME=$SERVICE_NAME）"
+
+  [ "$(id -u)" -eq 0 ] || fail "升级需要 root 权限，请用 sudo 运行。"
+  command -v systemctl >/dev/null 2>&1 || fail "未检测到 systemd，无法自动升级。请手动替换二进制。"
+
+  # 从 systemd 单元里取真实二进制路径，取不到就用默认值
+  TARGET_BIN=""
+  UNIT="/etc/systemd/system/${SERVICE_NAME}.service"
+  if [ -f "$UNIT" ]; then
+    TARGET_BIN=$(grep -m1 '^ExecStart=' "$UNIT" | sed 's/^ExecStart=//' | awk '{print $1}')
+  fi
+  [ -n "$TARGET_BIN" ] || TARGET_BIN="$INSTALL_DIR/komari"
+
+  if [ ! -f "$TARGET_BIN" ]; then
+    fail "找不到已安装的二进制：$TARGET_BIN
+如果你确认已安装，请显式指定：INSTALL_DIR=/你的路径 SERVICE_NAME=你的服务名 bash build-from-source.sh --upgrade
+若这台机器本来就没装过，去掉 --upgrade 只做构建。"
+  fi
+
+  # 数据目录提示（只读检查，绝不修改）
+  DATA_PATH="$(dirname "$TARGET_BIN")/data"
+  if [ -d "$DATA_PATH" ]; then
+    info "检测到数据目录：$DATA_PATH（本次不会改动）"
+  else
+    warn "未在 $DATA_PATH 找到 data 目录，请确认现有服务的数据位置。"
+  fi
+
+  BACKUP="${TARGET_BIN}.bak.$(date +%Y%m%d-%H%M%S)"
+  info "备份旧二进制 -> $BACKUP"
+  cp -p "$TARGET_BIN" "$BACKUP"
+
+  # 保留权限、原子替换：先传临时文件再 mv，避免运行中写坏正在执行的映像
+  info "替换二进制：$TARGET_BIN"
+  install -m "$(stat -c '%a' "$TARGET_BIN" 2>/dev/null || echo 755)" "$BUILT_SERVER" "${TARGET_BIN}.new"
+  mv -f "${TARGET_BIN}.new" "$TARGET_BIN"
+
+  info "重启服务 ${SERVICE_NAME}.service"
+  systemctl daemon-reload
+  systemctl restart "${SERVICE_NAME}.service"
+  sleep 3
+
+  if systemctl is-active --quiet "${SERVICE_NAME}.service"; then
+    info "升级完成，服务运行中。"
+    echo
+    echo "  服务状态: systemctl status ${SERVICE_NAME}"
+    echo "  回滚方式: cp -p $BACKUP $TARGET_BIN && systemctl restart ${SERVICE_NAME}"
+    echo "  数据目录: $DATA_PATH（未改动）"
+    echo
+    info "探针（$BUILT_AGENT）不在本机时无需处理；若本机也跑探针，请按同样方式替换其二进制。"
+    exit 0
+  else
+    warn "服务未能正常启动，正在回滚…"
+    cp -p "$BACKUP" "$TARGET_BIN"
+    systemctl restart "${SERVICE_NAME}.service" || true
+    fail "升级失败，已自动回滚到旧版本 $BACKUP。请查看：journalctl -u ${SERVICE_NAME} -n 60 --no-pager"
+  fi
+fi
+
 cat <<EOF
 
 $(printf '\033[32m构建完成\033[0m')
 
-  服务端: $WORK/src/komari/komari
-  探针:   $WORK/src/komari-agent/komari-agent
+  服务端: $BUILT_SERVER
+  探针:   $BUILT_AGENT
 
-启动服务端：
-  cd $WORK/src/komari && ./komari server -l 0.0.0.0:25774
-  首次访问 http://<你的IP>:25774 会进入安装引导，创建管理员账号。
+$(printf '\033[33m注意：这是「只构建」，没有安装也没有更新任何服务。\033[0m')
 
-在被监控服务器上运行探针（用面板后台生成的 token）：
-  ./komari-agent --endpoint http://<面板地址>:25774 --token <TOKEN>
+  已装过、想原地升级（需 root）：
+    sudo bash $0 --upgrade
+    （只替换二进制并重启，数据目录 $INSTALL_DIR/data 不动）
+
+  全新安装 / 手动启动服务端：
+    mkdir -p $INSTALL_DIR && cd $INSTALL_DIR
+    cp $BUILT_SERVER . && ./komari server -l 0.0.0.0:25774
+    首次访问 http://<你的IP>:25774 会进入安装引导，创建管理员账号。
+
+  在被监控服务器上运行探针（用面板后台生成的 token）：
+    $BUILT_AGENT --endpoint http://<面板地址>:25774 --token <TOKEN>
 
 本改造新增的面板能力：
   · 服务器卡片自动显示探针识别出的出口线路（CN2 GIA / 9929 / 4837 / CMIN / 163）
