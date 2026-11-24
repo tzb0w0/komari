@@ -26,6 +26,13 @@ curl -fsSL https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.s
 
 支持的架构：`linux amd64`、`linux arm64`（其他平台请用下面的源码构建方式）。
 
+> 交互说明：脚本已固定从 `/dev/tty` 读取选项，所以 `curl ... | bash` 也能正常选择菜单。
+> 若所在环境没有终端（如某些自动化面板），请改为先下载再运行：
+> ```bash
+> curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh
+> sudo bash install-komari.sh
+> ```
+
 > 想指定目录 / 端口 / 跳过 TUI：直接运行脚本并加参数，例如
 > `curl -fsSLO https://raw.githubusercontent.com/tzb0w0/komari/main/install-komari.sh && sudo bash install-komari.sh --install-dir /opt/komari`
 

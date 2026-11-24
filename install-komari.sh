@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# 交互读取统一从终端读。
+# 用 `curl ... | bash` 运行时，脚本本身来自 stdin，直接 read 会读到脚本内容，
+# 导致菜单「选项无效」并反复重问。这里固定从 /dev/tty 读取，两种运行方式都能正常交互。
+kt_read() {
+    if [ -r /dev/tty ]; then
+        IFS= read -r "$@" < /dev/tty
+    else
+        IFS= read -r "$@"
+    fi
+}
+
 # Color definitions for terminal output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -649,7 +660,7 @@ ui_menu() {
 
     printf '\n%s' "$(msg input_option)" >&2
     local choice
-    if ! IFS= read -r choice; then
+    if ! kt_read choice; then
         return 1
     fi
     printf '%s\n' "$choice"
@@ -671,7 +682,7 @@ ui_input() {
         printf '%s' "$prompt" >&2
         printf '%s' "$(msg input_default "$default")" >&2
     fi
-    if ! IFS= read -r input; then
+    if ! kt_read input; then
         return 1
     fi
 
@@ -697,7 +708,7 @@ ui_yesno() {
         printf '%s' "$prompt" >&2
         printf '%s' "$(msg yes_no)" >&2
     fi
-    if ! IFS= read -r confirm; then
+    if ! kt_read confirm; then
         return 1
     fi
 
@@ -724,7 +735,7 @@ ui_msgbox() {
 
 ui_pause() {
     printf '%s ' "$(msg press_enter)" >&2
-    IFS= read -r _ || true
+    kt_read _ || true
 }
 
 # 选择语言。语言菜单本身保持中英双语，默认简体中文。
@@ -738,7 +749,7 @@ select_language() {
         printf '  2) 简体中文\n\n' >&2
         printf '%s' "$(msg language_input)" >&2
 
-        if ! IFS= read -r choice; then
+        if ! kt_read choice; then
             exit 0
         fi
 
