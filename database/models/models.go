@@ -24,7 +24,9 @@ type Client struct {
 	IPv6             string `json:"ipv6,omitempty" gorm:"type:varchar(100)"`
 	Region           string `json:"region" gorm:"type:varchar(100)"`
 	// LineInfo 是探针自动识别的出口线路信息（JSON 字符串），由 agent 随 basicInfo 上报。
-	LineInfo         string     `json:"line_info,omitempty" gorm:"type:varchar(512)"`
+	LineInfo string `json:"line_info,omitempty" gorm:"type:varchar(512)"`
+	// LineName 是用户手动指定的线路名称（如 "CN2 GIA"、"9929"），优先于自动识别结果显示。
+	LineName         string     `json:"line_name,omitempty" gorm:"type:varchar(64)"`
 	Remark           string     `json:"remark,omitempty" gorm:"type:longtext"`
 	PublicRemark     string     `json:"public_remark,omitempty" gorm:"type:longtext"`
 	MemTotal         int64      `json:"mem_total" gorm:"type:bigint"`
