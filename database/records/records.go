@@ -53,6 +53,8 @@ func LoadTypeMetricNames(loadType string) []string {
 		names = []string{metricstore.MetricDisk}
 	case "network":
 		names = []string{metricstore.MetricNetIn, metricstore.MetricNetOut, metricstore.MetricNetTotalUp, metricstore.MetricNetTotalDown}
+	case "retransmit":
+		return []string{metricstore.MetricRetransmitRate}
 	case "process":
 		names = []string{metricstore.MetricProcess}
 	case "connections":

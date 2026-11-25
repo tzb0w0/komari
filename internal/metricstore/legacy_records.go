@@ -188,6 +188,8 @@ func recordMetricAggregation(metricName string) metric.Aggregation {
 
 func applyRecordMetricValue(rec *models.Record, metricName string, value float64) {
 	switch metricName {
+	case MetricRetransmitRate:
+		rec.RetransRate = float32(value)
 	case MetricCPU:
 		rec.Cpu = float32(value)
 	case MetricGPU:

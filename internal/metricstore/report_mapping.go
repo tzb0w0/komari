@@ -30,6 +30,12 @@ func reportMetricPoints(report v2.Report, trafficUp, trafficDown int64) []metric
 		{MetricName: MetricConnections, EntityID: entityID, Timestamp: ts, Value: float64(report.Connections.TCP)},
 		{MetricName: MetricConnectionsUDP, EntityID: entityID, Timestamp: ts, Value: float64(report.Connections.UDP)},
 	}
+	// 重传率仅在窗口结算后可用，未结算时不上报点
+	if report.Retransmit.Available {
+		points = append(points, metric.Point{
+			MetricName: MetricRetransmitRate, EntityID: entityID, Timestamp: ts, Value: report.Retransmit.Rate,
+		})
+	}
 	if report.GPU == nil {
 		return points
 	}

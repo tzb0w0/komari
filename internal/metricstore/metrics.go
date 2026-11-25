@@ -20,6 +20,7 @@ const (
 	MetricProcess        = "process.count"
 	MetricConnections    = "connections.tcp"
 	MetricConnectionsUDP = "connections.udp"
+	MetricRetransmitRate = "retransmit.rate"
 	MetricPingLatency    = "ping.latency_ms"
 	MetricPingLoss       = "ping.loss"
 )
@@ -29,7 +30,7 @@ const (
 var loadRecordMetricNames = []string{
 	MetricCPU, MetricGPU, MetricRAM, MetricSwap, MetricLoad, MetricDisk, MetricNetIn, MetricNetOut,
 	MetricNetTotalUp, MetricNetTotalDown, MetricTrafficUp, MetricTrafficDown,
-	MetricProcess, MetricConnections, MetricConnectionsUDP,
+	MetricProcess, MetricConnections, MetricConnectionsUDP, MetricRetransmitRate,
 }
 
 // gpuDeviceRecordMetricNames are stored separately from the entity-level GPU
@@ -75,6 +76,8 @@ func metricNameForRecordField(name string) (string, bool) {
 		return MetricProcess, true
 	case "connections":
 		return MetricConnections, true
+	case "retransmit", "retransmit_rate":
+		return MetricRetransmitRate, true
 	case "connections_udp":
 		return MetricConnectionsUDP, true
 	default:

@@ -96,6 +96,8 @@ type Record struct {
 	Process        int       `json:"process"`
 	Connections    int       `json:"connections"`
 	ConnectionsUdp int       `json:"connections_udp"`
+	// RetransRate 是窗口内的 TCP 重传率（百分比）
+	RetransRate float32 `json:"retrans_rate" gorm:"type:decimal(6,3)"`
 	//Uptime         int64     `json:"uptime" gorm:"type:bigint"`
 }
 

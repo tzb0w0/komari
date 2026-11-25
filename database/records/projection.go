@@ -21,6 +21,8 @@ type LoadProjection struct {
 	Process        *int     `json:"process,omitempty"`
 	Connections    *int     `json:"connections,omitempty"`
 	ConnectionsUdp *int     `json:"connections_udp,omitempty"`
+	// RetransRate 是 TCP 重传率（百分比）
+	RetransRate *float32 `json:"retransmit_rate,omitempty"`
 }
 
 // ProjectLoad returns the load_type projection for one record.

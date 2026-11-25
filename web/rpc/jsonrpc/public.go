@@ -157,7 +157,7 @@ func publicGetRecordsByUUID(ctx context.Context, req *rpc.JsonRpcRequest) (any, 
 	validLoadTypes := map[string]bool{
 		"cpu": true, "ram": true, "swap": true,
 		"load": true, "temp": true, "disk": true, "network": true,
-		"process": true, "connections": true, "all": true, "": true,
+		"process": true, "connections": true, "retransmit": true, "all": true, "": true,
 	}
 	if !validLoadTypes[params.LoadType] {
 		return nil, rpc.MakeError(rpc.InvalidParams, "Invalid load_type parameter", nil)
@@ -249,6 +249,8 @@ func filterPublicRecordsByLoadType(recs []models.Record, loadType string) []map[
 		switch loadType {
 		case "cpu":
 			record["cpu"] = *p.Cpu
+		case "retransmit":
+			record["retransmit_rate"] = *p.RetransRate
 		case "gpu":
 			record["gpu"] = *p.Gpu
 		case "ram":
