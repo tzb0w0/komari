@@ -30,6 +30,10 @@ type Settings struct {
 	CustomHead string `json:"custom_head" default:""`
 	CustomBody string `json:"custom_body" default:""`
 
+	// 探针采集参数（探针启动时从面板拉取）
+	LineDetectIntervalHours   int `json:"line_detect_interval_hours" default:"24"`  // 出口线路重新判定间隔（小时）
+	RetransmitIntervalMinutes int `json:"retransmit_interval_minutes" default:"30"` // TCP 重传采样窗口（分钟）
+
 	// 通知
 	NotificationEnabled        bool    `json:"notification_enabled" default:"true"` // 通知总开关
 	NotificationMethod         string  `json:"notification_method" default:"none"`
@@ -65,6 +69,8 @@ const (
 	DisablePasswordLoginKey   = "disable_password_login"
 	CustomHeadKey             = "custom_head"
 	CustomBodyKey             = "custom_body"
+	LineDetectIntervalKey     = "line_detect_interval_hours"
+	RetransmitIntervalKey     = "retransmit_interval_minutes"
 
 	NotificationEnabledKey        = "notification_enabled"
 	NotificationMethodKey         = "notification_method"

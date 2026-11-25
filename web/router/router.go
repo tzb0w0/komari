@@ -72,6 +72,8 @@ func registerAgentRoutes(r *gin.Engine) {
 	r.POST("/api/clients/register", client.RegisterClient)
 
 	tokenAuthorized := r.Group("/api/clients", api.RequireRole(api.RoleAdmin, api.RoleClient))
+	// 探针拉取采集参数（线路判定间隔、重传采样窗口）
+	tokenAuthorized.GET("/agent-settings", client.GetAgentSettings)
 	{
 		// Agent 上报统一使用 v2 JSON-RPC。
 		tokenAuthorized.GET("/v2/rpc", client.WebSocketV2RPC)
