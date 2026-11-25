@@ -1,8 +1,8 @@
 {
   "name": "Komari Glass（含线路/重传）",
   "short": "GlassCustom",
-  "description": "Komari Glass 定制版：延迟/丢包按监控任务分行、线路名贴行、重传曲线",
-  "version": "1.2.7-custom.5",
+  "description": "Komari Glass 定制版：按监控任务分行、回程线路标记、整机重传",
+  "version": "1.2.7-custom.6",
   "author": "mengying / customized",
   "url": "https://github.com/imengying/Komari-Glass",
   "preview": "dist/preview.png",
