@@ -315,7 +315,7 @@ func isValidMarketShort(short string) bool {
 }
 
 func downloadThemeFromURL(rawURL string) ([]byte, error) {
-	return DownloadMarketURL(rawURL, marketDownloadMaxBytes)
+	return DownloadRemoteFile(rawURL, remoteDownloadMaxBytes)
 }
 
 // getGitHubReleaseDownloadURL 从GitHub API获取最新release的下载链接

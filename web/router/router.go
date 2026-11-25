@@ -114,12 +114,6 @@ func registerAdminRoutes(r *gin.Engine) {
 		theme.POST("/update", admin.UpdateTheme)
 		theme.POST("/import", admin.ImportTheme)
 		theme.POST("/settings", admin.UpdateThemeSettings)
-		theme.GET("/market/sources", admin.ListThemeMarketSources)
-		theme.POST("/market/sources", admin.CreateThemeMarketSource)
-		theme.PUT("/market/sources/:id", admin.UpdateThemeMarketSource)
-		theme.DELETE("/market/sources/:id", admin.DeleteThemeMarketSource)
-		theme.GET("/market/catalog", admin.ListThemeMarketCatalog)
-		theme.POST("/market/install", admin.InstallThemeFromMarket)
 	}
 
 	// 2FA 含二维码 PNG / 敏感操作，保留 REST handler。
@@ -212,12 +206,6 @@ func registerAdminRoutes(r *gin.Engine) {
 		pluginGroup.GET("/list", jsonRpc.Bind("admin:listPlugins"))
 		pluginGroup.POST("/enabled", jsonRpc.Bind("admin:setPluginEnabled"))
 		pluginGroup.GET("/logs", jsonRpc.Bind("admin:getPluginLogs", jsonRpc.WithQuery("short")))
-		pluginGroup.GET("/market/sources", admin.ListPluginMarketSources)
-		pluginGroup.POST("/market/sources", admin.CreatePluginMarketSource)
-		pluginGroup.PUT("/market/sources/:id", admin.UpdatePluginMarketSource)
-		pluginGroup.DELETE("/market/sources/:id", admin.DeletePluginMarketSource)
-		pluginGroup.GET("/market/catalog", admin.ListPluginMarketCatalog)
-		pluginGroup.POST("/market/install", admin.InstallPluginFromMarket)
 		pluginGroup.POST("/delete", jsonRpc.Bind("admin:deletePlugin"))
 		pluginGroup.GET("/configuration", jsonRpc.Bind("admin:getPluginConfiguration", jsonRpc.WithQuery("short")))
 		pluginGroup.POST("/configuration", jsonRpc.Bind("admin:setPluginConfiguration"))

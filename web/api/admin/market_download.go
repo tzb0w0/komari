@@ -15,8 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// marketDownloadMaxBytes limits the response size of a market download.
-const marketDownloadMaxBytes = 100 << 20
+// remoteDownloadMaxBytes limits the response size of a market download.
+const remoteDownloadMaxBytes = 100 << 20
 
 const marketDownloadTimeout = 45 * time.Second
 
@@ -46,11 +46,11 @@ func IsSSRFProtectionEnabled() bool {
 	return err != nil || enabled
 }
 
-// DownloadMarketURL performs a market download. When SSRF protection is
+// DownloadRemoteFile performs a market download. When SSRF protection is
 // enabled, URLs resolving to private or internal addresses are rejected
 // (including on every redirect hop); when disabled, downloads proceed
 // without address filtering.
-func DownloadMarketURL(rawURL string, maxSize int64) ([]byte, error) {
+func DownloadRemoteFile(rawURL string, maxSize int64) ([]byte, error) {
 	if err := validateMarketDownloadURL(rawURL); err != nil {
 		return nil, err
 	}
