@@ -7,7 +7,9 @@ inputs:
     default: "23"
   repository:
     description: komari-web repository URL.
-    default: https://github.com/komari-monitor/komari-web
+    # 必须使用本 fork 的前端仓库：官方仓库不包含我们定制的后台
+    # （已移除远程执行 / 主题市场 / 插件市场 / WebSSH，版本检查指向本 fork）。
+    default: https://github.com/tzb0w0/komari-web
   ref:
     description: Optional komari-web ref to build. Uses the repository default branch when empty.
     default: ""
