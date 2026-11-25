@@ -8,7 +8,6 @@ import (
 	"github.com/komari-monitor/komari/web/api/admin"
 	"github.com/komari-monitor/komari/web/api/client"
 	public_api "github.com/komari-monitor/komari/web/api/public"
-	"github.com/komari-monitor/komari/web/api/terminal"
 	"github.com/komari-monitor/komari/web/filemanager"
 	"github.com/komari-monitor/komari/web/public"
 	jsonRpc "github.com/komari-monitor/komari/web/rpc/jsonrpc"
@@ -81,7 +80,6 @@ func registerAgentRoutes(r *gin.Engine) {
 		// File data uses a short-lived, raw HTTP stream opened by a file RPC.
 		tokenAuthorized.GET("/transfer/:id", filemanager.AgentTransfer)
 		tokenAuthorized.POST("/transfer/:id", filemanager.AgentTransfer)
-		tokenAuthorized.GET("/terminal", terminal.EstablishConnection)
 	}
 }
 
@@ -185,7 +183,6 @@ func registerAdminRoutes(r *gin.Engine) {
 		// RequestTerminal validates 2FA only when creating a new session. Reattach
 		// requests are authenticated against the existing session owner so a short
 		// network flap does not depend on the current TOTP window.
-		clientGroup.GET("/:uuid/terminal", terminal.RequestTerminal)
 		clientGroup.POST("/:uuid/file/upload", filemanager.Upload)
 		clientGroup.GET("/:uuid/file/download", filemanager.Download)
 		clientGroup.HEAD("/:uuid/file/download", filemanager.Download)

@@ -196,13 +196,18 @@ func static(r *gin.RouterGroup, noRoute func(handlers ...gin.HandlerFunc), force
 	// 核心逻辑：渲染 Index.html
 	serveIndex := func(c *gin.Context) {
 		reqPath := c.Request.URL.Path
+		// 未注册的 /api/* 请求不应回落到 SPA 首页（否则已下线的接口会返回 200 HTML）
+		if strings.HasPrefix(reqPath, "/api/") {
+			c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "API not found"})
+			return
+		}
 		cfg := getConfig()
 
 		currentTheme := cfg[config.ThemeKey].(string)
 		shouldReplace := true
 
 		// 特殊页面：强制使用 default 主题，且不进行内容替换
-		if forceDefaultTheme || strings.HasPrefix(reqPath, "/admin") || strings.HasPrefix(reqPath, "/terminal") {
+		if forceDefaultTheme || strings.HasPrefix(reqPath, "/admin") {
 			currentTheme = DefaultTheme
 			shouldReplace = false
 		}
