@@ -56,6 +56,8 @@ func ProjectLoad(r models.Record, loadType string) LoadProjection {
 	case "connections":
 		p.Connections = ptr(r.Connections)
 		p.ConnectionsUdp = ptr(r.ConnectionsUdp)
+	case "retransmit", "retransmit_rate":
+		p.RetransRate = ptr(r.RetransRate)
 	default:
 		p.Cpu = ptr(r.Cpu)
 	}
