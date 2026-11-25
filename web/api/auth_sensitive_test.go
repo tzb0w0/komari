@@ -135,7 +135,7 @@ func TestGet2FACodeSources(t *testing.T) {
 			gin.SetMode(gin.TestMode)
 			recorder := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(recorder)
-			c.Request = httptest.NewRequest(http.MethodGet, "/api/admin/task/exec", nil)
+			c.Request = httptest.NewRequest(http.MethodGet, "/api/admin/settings", nil)
 			tt.mutate(c)
 			if got := get2FACode(c); got != tt.want {
 				t.Fatalf("get2FACode = %q, want %q", got, tt.want)
@@ -151,9 +151,9 @@ func TestRequireSensitive2FAAbortsAndPasses(t *testing.T) {
 	plainUUID := create2FAUser(t, "mw-user", "")
 
 	tests := []struct {
-		name        string
-		setup       func(*gin.Context)
-		wantStatus  int
+		name         string
+		setup        func(*gin.Context)
+		wantStatus   int
 		wantVerified bool
 	}{
 		{

@@ -47,9 +47,6 @@ func TestAdminRoutesAreRegistered(t *testing.T) {
 		{http.MethodPost, "/api/admin/client/:uuid/edit"},
 		{http.MethodPost, "/api/admin/client/:uuid/remove"},
 		{http.MethodGet, "/api/admin/client/:uuid/token"},
-		{http.MethodGet, "/api/admin/client/:uuid/terminal"},
-		{http.MethodPost, "/api/admin/task/exec"},
-		{http.MethodGet, "/api/admin/task/all"},
 		{http.MethodPost, "/api/admin/plugin/enabled"},
 		{http.MethodGet, "/api/admin/plugin/list"},
 		{http.MethodPost, "/api/admin/plugin/configuration"},
@@ -158,12 +155,12 @@ func TestClientPrefixRejectsGuests(t *testing.T) {
 // second-factor gate. Their middleware behaviour is covered by
 // TestVerifySensitive2FACore in web/api, which does not depend on a live
 // database; here we only guard against the routes being dropped.
+// 远程执行接口已移除，敏感接口只保留 2FA 关闭。
 func TestSensitiveRoutesExist(t *testing.T) {
 	engine := buildTestEngine(t)
 	routes := routesOf(engine)
 
 	for _, want := range []routeKey{
-		{http.MethodPost, "/api/admin/task/exec"},
 		{http.MethodPost, "/api/admin/2fa/disable"},
 	} {
 		if !routes[want] {
