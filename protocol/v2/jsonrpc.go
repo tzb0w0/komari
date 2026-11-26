@@ -159,7 +159,10 @@ type PullParams struct {
 }
 
 type PingParams struct {
-	TaskID uint   `json:"ping_task_id"`
+	TaskID uint `json:"ping_task_id"`
+	// Name 是后台上填的任务名（如「广东电信」）。探针据此判断目的运营商，
+	// 避免把经其他运营商中转的路径误判成那条线路；旧探针会忽略该字段。
+	Name   string `json:"ping_task_name,omitempty"`
 	Type   string `json:"ping_type"`
 	Target string `json:"ping_target"`
 }
