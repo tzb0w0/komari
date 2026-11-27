@@ -71,8 +71,22 @@ func executePingTask(ctx context.Context, task models.PingTask) {
 }
 
 // targetPingClientUUIDs 根据任务配置计算本次调度需要下发的在线服务器列表。
+// 同一客户端只下发一次：绑定列表里出现重复 UUID 时，重复下发会让目标在
+// 同一秒收到多组探测包，既拉高延迟也容易被对端 ICMP 限速，表现为「莫名丢包」。
 func targetPingClientUUIDs(task models.PingTask) []string {
-	return task.Clients
+	seen := make(map[string]struct{}, len(task.Clients))
+	out := make([]string, 0, len(task.Clients))
+	for _, uuid := range task.Clients {
+		if uuid == "" {
+			continue
+		}
+		if _, dup := seen[uuid]; dup {
+			continue
+		}
+		seen[uuid] = struct{}{}
+		out = append(out, uuid)
+	}
+	return out
 }
 
 // ReloadPingSchedule 加载或重载时间表
