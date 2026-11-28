@@ -2,7 +2,7 @@
   "name": "Komari Glass（含线路/重传）",
   "short": "GlassCustom",
   "description": "基于 Komari Glass 的定制版：新增当前线路与 TCP 重传测试，移除终端相关入口。",
-  "version": "1.2.7-custom.15",
+  "version": "1.2.7-custom.16",
   "author": "mengying / customized",
   "url": "https://github.com/imengying/Komari-Glass",
   "preview": "dist/preview.png",
